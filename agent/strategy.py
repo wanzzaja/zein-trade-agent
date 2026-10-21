@@ -146,8 +146,9 @@ def evaluate(df, i, token, cfg):
     entry = float(row["close"])
     stop = _structure_low(df, i) - cfg.sl_atr_buffer * a
     risk = entry - stop
-    if risk < cfg.min_risk_atr * a:
-        stop = entry - cfg.min_risk_atr * a
+    min_risk = max(cfg.min_risk_atr * a, cfg.min_risk_pct * entry)
+    if risk < min_risk:  # a stop inside spread/noise turns slippage into multi-R losses
+        stop = entry - min_risk
         risk = entry - stop
     if risk > cfg.max_risk_atr * a or risk <= 0:
         return None

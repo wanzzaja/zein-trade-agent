@@ -18,25 +18,29 @@ zein-trade-agent/
 
 Bot hanya mengambil posisi **long** (Recall = spot) dan sebuah sinyal harus lolos semua filter:
 
-1. **Trend timeframe besar (4h)** naik: close > EMA50, EMA50 menanjak, EMA20 > EMA50.
-2. **Market trending** (ADX ≥ 20, +DI > -DI) dan EMA20 > EMA50 > EMA200 di timeframe entry (1h).
+1. **Trend timeframe besar (1d)** naik: close > EMA50, EMA50 menanjak, EMA20 > EMA50.
+2. **Market trending** (ADX ≥ 20, +DI > -DI) dan EMA20 > EMA50 > EMA200 di timeframe entry (4h). Timeframe 15m/1h tidak dipakai: di data hasil sinyal sebelumnya keduanya rugi.
 3. **Setup**: *pullback* ke EMA20 + RSI reset + candle bullish menembus high sebelumnya, atau
    *breakout* Donchian 20 setelah squeeze Bollinger dengan volume > 1.5x rata-rata.
 4. **Skor konfluensi** ≥ `MIN_SCORE` (HTF > EMA200, ADX kuat, volume, MACD, RSI sehat, close kuat).
 5. **RR riil** ≥ `MIN_RR` (default 2.0, sudah dipotong fee/slippage): SL di bawah swing low (dibatasi
-   0.8–3 ATR), target 3R tapi dipotong ke resistance besar terdekat. Kalau ruang ke resistance tidak cukup,
+   0.8–3 ATR dan minimal 0.3% dari harga, supaya SL tidak lebih kecil dari spread), target 3R tapi dipotong ke resistance besar terdekat. Kalau ruang ke resistance tidak cukup,
    sinyal **dibuang**, bukan dipaksa.
 
 Manajemen posisi: SL ke break-even di +1R, jual 50% di TP1 (1.5R), sisanya trailing stop 2.5 ATR
-sampai target, dengan batas waktu 72 bar. Risiko 1% equity per trade, maks 3 posisi, cooldown setelah loss,
+sampai target, dengan batas waktu 60 bar (10 hari). Risiko 1% equity per trade, maks 3 posisi,
+maks 2 entry baru per scan (sinyal yang muncul bersamaan saling berkorelasi), cooldown setelah loss,
 dan bot berhenti entry kalau rugi harian ≥ 3%.
+
+Saat live: SL dicek terhadap harga terkini (tidak menunggu candle 4h tutup), candle tempat entry tidak
+pernah dipakai untuk cek SL/TP, dan entry dibatalkan kalau harga sudah lari > 0.25R dari harga sinyal.
 
 ## Menjalankan
 
 ```bash
 pip install -r requirements.txt
 cp .env.example .env          # isi RECALL_API_KEY, set DRY_RUN=false kalau sudah yakin
-python main.py --backtest     # uji di ~6000 candle 1h terakhir
+python main.py --backtest     # uji di ~6000 candle 4h terakhir
 python main.py --scan         # scan sekali
 python main.py                # loop live
 ```

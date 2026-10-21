@@ -20,16 +20,16 @@ paper = {"cash": 10_000.0}  # simulated USDC balance used when DRY_RUN is on
 
 def load_market(token, entry_limit=600, trend_limit=400):
     sym = MARKET_SYMBOLS[token]
-    e = drop_unclosed(fetch_klines(CONFIG.market_data_url, sym, CONFIG.entry_tf, entry_limit))
+    raw = fetch_klines(CONFIG.market_data_url, sym, CONFIG.entry_tf, entry_limit)
     t = drop_unclosed(fetch_klines(CONFIG.market_data_url, sym, CONFIG.trend_tf, trend_limit))
-    return e, t
+    return drop_unclosed(raw), t, float(raw["close"].iloc[-1])
 
 
 def scan_all():
-    signals, frames = [], {}
+    signals, frames, prices = [], {}, {}
     for token in CONFIG.tokens:
         try:
-            e, t = load_market(token)
+            e, t, prices[token] = load_market(token)
             sig, df = scan(token, e, t, CONFIG)
             frames[token] = df
             if sig:
@@ -38,7 +38,18 @@ def scan_all():
             log.warning(f"scan {token} failed: {exc}")
     # best opportunities first: higher RR and confluence
     signals.sort(key=lambda s: (s.rr * s.score), reverse=True)
-    return signals, frames
+    return signals, frames, prices
+
+
+def close_position(client, risk, positions, token, reason, price, qty):
+    p = positions[token]
+    client.execute(token, CONFIG.quote_token, round(qty, 8), f"exit {reason} @ {price:.4f}")
+    paper["cash"] += qty * price * (1 - CONFIG.fee_rate)
+    p.realized += qty * (price * (1 - CONFIG.fee_rate) - p.entry * (1 + CONFIG.fee_rate))
+    log.info(f"EXIT {token} {reason} qty={qty:.6f} price={price:.4f} pnl={p.realized:.2f}")
+    if reason != "tp1":
+        risk.on_close(token, p.realized)
+        del positions[token]
 
 
 def equity_and_cash(client, positions, frames):
@@ -59,41 +70,50 @@ def live():
     last_bar = {t: p.opened_at for t, p in positions.items()}
 
     while True:
-        signals, frames = scan_all()
+        signals, frames, prices = scan_all()
         equity, cash = equity_and_cash(client, positions, frames)
         risk.new_bar(datetime.now(timezone.utc).date(), equity)
 
         for token, p in list(positions.items()):
+            # intrabar stop: do not wait up to a full candle for the close
+            price = prices.get(token)
+            if price is not None and price <= p.stop:
+                close_position(client, risk, positions, token, "stop", price, p.qty)
+                continue
             df = frames.get(token)
+            # bars are only processed after the entry bar, never the bar the entry came from
             if df is None or last_bar.get(token) == str(df.index[-1]):
                 continue
             last_bar[token] = str(df.index[-1])
             row = df.iloc[-1]
-            for reason, price, qty in p.update(row["high"], row["low"], row["close"], row["atr"], CONFIG):
-                client.execute(token, CONFIG.quote_token, round(qty, 8), f"exit {reason} @ {price:.4f}")
-                paper["cash"] += qty * price * (1 - CONFIG.fee_rate)
-                p.realized += qty * (price * (1 - CONFIG.fee_rate) - p.entry * (1 + CONFIG.fee_rate))
-                log.info(f"EXIT {token} {reason} qty={qty:.6f} price={price:.4f} pnl={p.realized:.2f}")
-                if reason in ("stop", "target", "time"):
-                    risk.on_close(token, p.realized)
-                    del positions[token]
+            # Position.update already reduces qty on tp1; close_position only books the fill
+            for reason, px, qty in p.update(row["high"], row["low"], row["close"], row["atr"], CONFIG):
+                close_position(client, risk, positions, token, reason, px, qty)
+                if token not in positions:
                     break
 
+        opened = 0
         for sig in signals:
             log.info(f"SIGNAL {sig.describe()}")
-            if not risk.can_open(sig.token, positions, equity):
+            if opened >= CONFIG.max_new_per_scan or not risk.can_open(sig.token, positions, equity):
+                continue
+            price = prices.get(sig.token, sig.entry)
+            # the order fills at today's price, not the candle close: skip chased or broken setups
+            if price > sig.entry + 0.25 * sig.risk or price <= sig.stop:
+                log.info(f"SKIP {sig.token}: price {price:.4f} moved away from signal entry {sig.entry:.4f}")
                 continue
             qty = risk.size(sig, equity, cash)
-            notional = qty * sig.entry
+            notional = qty * price
             if notional < 10:
                 continue
             client.execute(CONFIG.quote_token, sig.token, round(notional, 2),
                            f"{sig.setup} score {sig.score} RR {sig.rr:.2f}")
             paper["cash"] -= notional
             cash -= notional
-            positions[sig.token] = Position(sig.token, sig.entry, sig.stop, sig.stop, sig.tp1, sig.target,
+            positions[sig.token] = Position(sig.token, price, sig.stop, sig.stop, sig.tp1, sig.target,
                                             qty, qty, str(sig.time), highest=sig.entry)
             last_bar[sig.token] = str(sig.time)
+            opened += 1
             log.info(f"ENTRY {sig.token} qty={qty:.6f} notional={notional:.2f}")
 
         save_state(CONFIG.state_file, positions)
@@ -101,7 +121,8 @@ def live():
 
 
 def backtest(bars):
-    ratio = {"15m": 16, "1h": 4, "4h": 1}.get(CONFIG.entry_tf, 4)
+    minutes = {"15m": 15, "1h": 60, "4h": 240, "1d": 1440}
+    ratio = max(1, minutes[CONFIG.trend_tf] // minutes[CONFIG.entry_tf])
     data = {}
     for token in CONFIG.tokens:
         sym = MARKET_SYMBOLS[token]

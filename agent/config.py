@@ -50,8 +50,8 @@ class Config:
     # --- universe / timeframes ---
     tokens: list = field(default_factory=lambda: _env("TOKENS", "WETH,WBTC,LINK,UNI,AAVE").split(","))
     quote_token: str = "USDC"
-    entry_tf: str = _env("ENTRY_TF", "1h")
-    trend_tf: str = _env("TREND_TF", "4h")
+    entry_tf: str = _env("ENTRY_TF", "4h")
+    trend_tf: str = _env("TREND_TF", "1d")
     scan_interval_sec: int = _env("SCAN_INTERVAL_SEC", 300, int)
 
     # --- signal quality filters ---
@@ -61,6 +61,7 @@ class Config:
     target_rr: float = _env("TARGET_RR", 3.0, float)  # preferred final target in R
     max_risk_atr: float = _env("MAX_RISK_ATR", 3.0, float)  # stop too wide -> skip
     min_risk_atr: float = _env("MIN_RISK_ATR", 0.8, float)  # stop too tight -> widen to this
+    min_risk_pct: float = _env("MIN_RISK_PCT", 0.003, float)  # stop never closer than 0.3% of price
     sl_atr_buffer: float = 0.25
 
     # --- trade management ---
@@ -68,12 +69,13 @@ class Config:
     partial_at_r: float = _env("PARTIAL_AT_R", 1.5, float)
     partial_fraction: float = _env("PARTIAL_FRACTION", 0.5, float)
     trail_atr_mult: float = _env("TRAIL_ATR_MULT", 2.5, float)
-    max_bars_in_trade: int = _env("MAX_BARS_IN_TRADE", 72, int)
+    max_bars_in_trade: int = _env("MAX_BARS_IN_TRADE", 60, int)  # 60 x 4h = 10 days
 
     # --- risk ---
     risk_per_trade: float = _env("RISK_PER_TRADE", 0.01, float)    # 1% equity per trade
     max_position_pct: float = _env("MAX_POSITION_PCT", 0.25, float)
     max_open_positions: int = _env("MAX_OPEN_POSITIONS", 3, int)
+    max_new_per_scan: int = _env("MAX_NEW_PER_SCAN", 2, int)  # signals in one scan are correlated
     daily_loss_limit: float = _env("DAILY_LOSS_LIMIT", 0.03, float)  # stop trading for the day
     loss_cooldown_bars: int = _env("LOSS_COOLDOWN_BARS", 6, int)
     fee_rate: float = _env("FEE_RATE", 0.002, float)  # per side, fee + slippage

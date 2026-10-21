@@ -50,12 +50,19 @@ def run_backtest(data, cfg, start_equity=10_000.0):
 
         # look for new entries on closed bar
         eq = equity_at(ts)
+        candidates = []
         for t, f in frames.items():
             n = pos_idx[t].get(ts)
             if n is None or not risk.can_open(t, positions, eq):
                 continue
             sig = evaluate(f, n, t, cfg)
-            if sig is None:
+            if sig is not None:
+                candidates.append(sig)
+        # signals firing on the same bar are one correlated bet: keep only the best few
+        candidates.sort(key=lambda s: s.rr * s.score, reverse=True)
+        for sig in candidates[:cfg.max_new_per_scan]:
+            t = sig.token
+            if not risk.can_open(t, positions, eq):
                 continue
             qty = risk.size(sig, eq, cash)
             if qty * sig.entry < 10:
