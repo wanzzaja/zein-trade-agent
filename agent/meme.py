@@ -675,7 +675,8 @@ def score_token(m, sec, cfg):
             tags.append("EARLY")
         if age is not None and age <= 72:
             tags.append("FRESH")
-        if accel >= 2 and buy_ratio >= 1.3 and (ch.get("h1") or 0) > 0:
+        # a ratio from a handful of trades is noise, not momentum
+        if accel >= 2 and buy_ratio >= 1.3 and (ch.get("h1") or 0) > 0 and tx1["buys"] + tx1["sells"] >= 10:
             tags.append("MOMENTUM")
         if (sec["renounced"] and not sec["warnings"] and not sec["danger"] and (tax or 0) <= 1
                 and (sec["bonding_curve"] or (sec["lp_locked_pct"] or 0) >= 95)):
