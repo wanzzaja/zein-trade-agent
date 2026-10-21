@@ -1,5 +1,5 @@
 __pycache__/
 *.pyc
 .env
-data/logs.txt
-data/state.json
+data/*
+!data/.gitkeep

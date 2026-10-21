@@ -1,17 +1,23 @@
 """Walk-forward bar-by-bar backtest using exactly the live signal + management logic."""
 import numpy as np
 
+from .journal import close_record, record
 from .strategy import evaluate, prepare
 from .trader import Position, RiskManager
 
 
 def run_backtest(data, cfg, start_equity=10_000.0):
-    """data: {token: (entry_df, trend_df)}. Returns (trades, equity_curve)."""
-    frames = {t: prepare(e, h) for t, (e, h) in data.items()}
+    """data: {token: (entry_df, trend_df)}.
+
+    Returns (closed trades, equity curve, still-open journal records, bar index)."""
+    btc = data.get(cfg.btc_token)
+    # BTC may be loaded only as the regime reference; trade just the configured tokens
+    frames = {t: prepare(e, h, btc) for t, (e, h) in data.items() if t in cfg.tokens}
     index = sorted(set().union(*[f.index for f in frames.values()]))
     pos_idx = {t: {ts: n for n, ts in enumerate(f.index)} for t, f in frames.items()}
 
     cash, positions, trades, curve = start_equity, {}, [], []
+    open_recs = {}
     risk = RiskManager(cfg)
 
     def equity_at(ts):
@@ -42,8 +48,8 @@ def run_backtest(data, cfg, start_equity=10_000.0):
                 p.realized += proceeds - qty * p.entry * (1 + cfg.fee_rate)
                 if reason in ("stop", "target", "time"):
                     r_mult = p.realized / (p.initial_qty * p.risk)
-                    trades.append({"token": t, "opened": p.opened_at, "closed": str(ts),
-                                   "exit": reason, "pnl": p.realized, "r": r_mult})
+                    rec = close_record(open_recs.pop(t), r_mult, ts)
+                    trades.append({**rec, "exit": reason, "pnl": p.realized, "r": r_mult})
                     risk.on_close(t, p.realized)
                     del positions[t]
                     break
@@ -70,8 +76,11 @@ def run_backtest(data, cfg, start_equity=10_000.0):
             cash -= qty * sig.entry * (1 + cfg.fee_rate)
             positions[t] = Position(t, sig.entry, sig.stop, sig.stop, sig.tp1, sig.target,
                                     qty, qty, str(ts), highest=sig.entry)
+            open_recs[t] = record(sig, sig.entry, cfg.entry_tf)
         curve.append(equity_at(ts))
-    return trades, np.array(curve)
+    # positions still running at the end of the data
+    trades_open = list(open_recs.values())
+    return trades, np.array(curve), trades_open, index
 
 
 def summarize(trades, curve, start_equity=10_000.0):
@@ -81,7 +90,7 @@ def summarize(trades, curve, start_equity=10_000.0):
     pnl = np.array([t["pnl"] for t in trades])
     wins, losses = pnl[pnl > 0], pnl[pnl <= 0]
     peak = np.maximum.accumulate(curve)
-    return {
+    out = {
         "trades": len(trades),
         "win_rate": round(len(wins) / len(trades) * 100, 1),
         "avg_R": round(r.mean(), 2),
@@ -91,3 +100,4 @@ def summarize(trades, curve, start_equity=10_000.0):
         "return_pct": round((curve[-1] / start_equity - 1) * 100, 2),
         "max_drawdown_pct": round(((curve - peak) / peak).min() * 100, 2),
     }
+    return {k: (v if isinstance(v, int) else float(v)) for k, v in out.items()}

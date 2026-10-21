@@ -1,5 +1,6 @@
 """Logging, market data and technical indicators."""
 import logging
+import os
 import time
 
 import numpy as np
@@ -12,6 +13,7 @@ def get_logger(log_file="data/logs.txt"):
     if logger.handlers:
         return logger
     logger.setLevel(logging.INFO)
+    os.makedirs(os.path.dirname(log_file) or ".", exist_ok=True)
     fmt = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
     for handler in (logging.StreamHandler(), logging.FileHandler(log_file)):
         handler.setFormatter(fmt)

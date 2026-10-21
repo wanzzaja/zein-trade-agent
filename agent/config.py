@@ -63,6 +63,10 @@ class Config:
     min_risk_atr: float = _env("MIN_RISK_ATR", 0.8, float)  # stop too tight -> widen to this
     min_risk_pct: float = _env("MIN_RISK_PCT", 0.003, float)  # stop never closer than 0.3% of price
     sl_atr_buffer: float = 0.25
+    btc_filter: bool = _env("BTC_FILTER", True, bool)          # only buy alts while BTC trend is up
+    btc_token: str = _env("BTC_TOKEN", "WBTC")
+    rs_lookback: int = _env("RS_LOOKBACK", 30, int)            # bars for relative strength vs BTC
+    vol_spike_mult: float = _env("VOL_SPIKE_MULT", 2.0, float)  # skip when ATR% > 2x its median
 
     # --- trade management ---
     breakeven_at_r: float = _env("BREAKEVEN_AT_R", 1.0, float)
@@ -82,6 +86,14 @@ class Config:
 
     log_file: str = _env("LOG_FILE", "data/logs.txt")
     state_file: str = _env("STATE_FILE", "data/state.json")
+    journal_file: str = _env("JOURNAL_FILE", "data/journal.json")
+    snapshot_file: str = _env("SNAPSHOT_FILE", "data/snapshot.json")
+    backtest_file: str = _env("BACKTEST_FILE", "data/backtest.json")
+
+    # --- Zorra Terminal (web UI) ---
+    ui_enabled: bool = _env("UI_ENABLED", True, bool)
+    ui_host: str = _env("UI_HOST", "127.0.0.1")
+    ui_port: int = _env("UI_PORT", 8787, int)
 
 
 CONFIG = Config()

@@ -153,5 +153,6 @@ def load_state(path):
 
 
 def save_state(path, positions):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w") as f:
         json.dump({k: asdict(v) for k, v in positions.items()}, f, indent=2)

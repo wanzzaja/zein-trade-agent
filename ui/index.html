@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zorra Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05070b;
+  --bg-grid: rgba(0, 255, 170, 0.035);
+  --panel: #0b1017;
+  --panel-2: #0f1620;
+  --line: #19232f;
+  --line-2: #243142;
+  --text: #dce6f0;
+  --muted: #6c7e92;
+  --dim: #3d4b5c;
+  --green: #00e59b;
+  --green-soft: rgba(0, 229, 155, 0.12);
+  --red: #ff4f6d;
+  --red-soft: rgba(255, 79, 109, 0.12);
+  --amber: #ffb84d;
+  --amber-soft: rgba(255, 184, 77, 0.12);
+  --cyan: #38d4ff;
+  --violet: #a07cff;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(1200px 600px at 10% -10%, rgba(0, 229, 155, 0.08), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(160, 124, 255, 0.07), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font: 13px/1.45 var(--mono);
+  min-height: 100vh;
+}
+a { color: inherit; }
+.wrap { max-width: 1480px; margin: 0 auto; padding: 0 20px 40px; }
+
+/* ---------- header ---------- */
+header {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(5, 7, 11, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.bar { max-width: 1480px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+.logo {
+  width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--green), var(--cyan) 55%, var(--violet));
+  color: #031015; font: 700 20px/1 var(--display);
+  box-shadow: 0 0 24px rgba(0, 229, 155, 0.35);
+}
+.brand h1 { margin: 0; font: 700 19px/1 var(--display); letter-spacing: 0.18em; }
+.brand h1 .z { color: var(--green); text-shadow: 0 0 18px rgba(0, 229, 155, 0.55); }
+.brand .by { margin-top: 4px; font-size: 10.5px; letter-spacing: 0.32em; color: var(--muted); }
+.brand .by b { color: var(--violet); font-weight: 700; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip {
+  border: 1px solid var(--line-2); border-radius: 999px; padding: 5px 11px;
+  font-size: 11px; letter-spacing: 0.06em; color: var(--muted); white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 7px; background: var(--panel);
+}
+.chip b { color: var(--text); font-weight: 500; }
+.chip.good { border-color: rgba(0, 229, 155, 0.4); color: var(--green); background: var(--green-soft); }
+.chip.bad { border-color: rgba(255, 79, 109, 0.4); color: var(--red); background: var(--red-soft); }
+.chip.warn { border-color: rgba(255, 184, 77, 0.4); color: var(--amber); background: var(--amber-soft); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.dot.live { animation: pulse 1.6s infinite; }
+@keyframes pulse { 50% { opacity: 0.25; } }
+
+/* ---------- ticker ---------- */
+.ticker { overflow: hidden; border-top: 1px solid var(--line); white-space: nowrap; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.ticker-track { display: inline-flex; gap: 34px; padding: 7px 0; animation: scroll 40s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.tick { font-size: 12px; color: var(--muted); }
+.tick b { color: var(--text); font-weight: 500; margin: 0 6px; }
+@keyframes scroll { to { transform: translateX(-50%); } }
+
+/* ---------- tabs ---------- */
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 22px 0 14px; flex-wrap: wrap; }
+.tabs { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; padding: 3px; background: var(--panel); }
+.tabs button {
+  border: 0; background: transparent; color: var(--muted); font: 500 12px var(--mono);
+  letter-spacing: 0.1em; padding: 7px 16px; border-radius: 7px; cursor: pointer;
+}
+.tabs button.on { background: var(--panel-2); color: var(--green); box-shadow: inset 0 0 0 1px rgba(0, 229, 155, 0.35); }
+.updated { color: var(--muted); font-size: 11.5px; }
+
+/* ---------- KPI ---------- */
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.kpi {
+  position: relative; overflow: hidden;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+}
+.kpi::after { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: var(--accent, var(--line-2)); opacity: 0.9; }
+.kpi .label { color: var(--muted); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; }
+.kpi .value { font: 700 24px/1.15 var(--display); margin-top: 8px; letter-spacing: 0.01em; }
+.kpi .sub { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+
+/* ---------- panels ---------- */
+.grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; min-width: 0; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panel-head h2 { margin: 0; font: 700 12px var(--display); letter-spacing: 0.2em; text-transform: uppercase; color: var(--text); }
+.panel-head h2::before { content: "▍"; color: var(--green); margin-right: 6px; }
+.panel-head .hint { color: var(--muted); font-size: 11px; }
+.panel-body { padding: 14px 16px; }
+.empty { color: var(--muted); padding: 26px 8px; text-align: center; }
+.empty b { color: var(--text); font-weight: 500; }
+
+/* chart */
+.chart { position: relative; height: 250px; }
+.chart svg { width: 100%; height: 100%; display: block; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--panel-2); border: 1px solid var(--line-2);
+  border-radius: 8px; padding: 6px 9px; font-size: 11.5px; transform: translate(-50%, -110%); display: none; white-space: nowrap;
+}
+.hist { display: flex; align-items: flex-end; gap: 5px; height: 150px; padding-top: 10px; }
+.hist .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+.hist .b { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
+.hist .n { font-size: 10px; color: var(--muted); }
+.hist .x { font-size: 10px; color: var(--dim); }
+.tfrow { display: grid; grid-template-columns: 54px 1fr 64px; align-items: center; gap: 10px; margin-top: 9px; font-size: 12px; }
+.tfbar { height: 8px; background: var(--panel-2); border-radius: 99px; position: relative; overflow: hidden; }
+.tfbar i { position: absolute; top: 0; bottom: 0; border-radius: 99px; }
+
+/* tables */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { text-align: left; color: var(--muted); font-weight: 500; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: rgba(255, 255, 255, 0.015); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.coin { font-weight: 700; letter-spacing: 0.04em; }
+.coin small { color: var(--muted); font-weight: 400; margin-left: 5px; }
+.pos { color: var(--green); } .neg { color: var(--red); } .mut { color: var(--muted); }
+.pill { display: inline-block; border-radius: 6px; padding: 2px 8px; font-size: 11px; letter-spacing: 0.05em; border: 1px solid transparent; }
+.pill.up, .pill.win { color: var(--green); background: var(--green-soft); border-color: rgba(0, 229, 155, 0.25); }
+.pill.down, .pill.loss { color: var(--red); background: var(--red-soft); border-color: rgba(255, 79, 109, 0.25); }
+.pill.open { color: var(--cyan); background: rgba(56, 212, 255, 0.1); border-color: rgba(56, 212, 255, 0.25); }
+.pill.scratch { color: var(--amber); background: var(--amber-soft); border-color: rgba(255, 184, 77, 0.25); }
+.sig {
+  display: inline-flex; gap: 8px; align-items: center; padding: 3px 10px; border-radius: 7px; font-size: 11.5px;
+  color: #02140d; background: var(--green); font-weight: 700; box-shadow: 0 0 18px rgba(0, 229, 155, 0.45);
+}
+.reason { color: var(--muted); font-size: 12px; }
+.meter { display: inline-block; width: 46px; height: 5px; background: var(--panel-2); border-radius: 99px; vertical-align: middle; margin-left: 7px; position: relative; overflow: hidden; }
+.meter i { position: absolute; inset: 0 auto 0 0; border-radius: 99px; }
+
+/* positions */
+.posc { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel-2); margin-bottom: 10px; }
+.posc:last-child { margin-bottom: 0; }
+.posc .top { display: flex; justify-content: space-between; align-items: baseline; }
+.posc .r { font: 700 18px var(--display); }
+.rail { position: relative; height: 8px; border-radius: 99px; margin: 26px 0 24px; background: linear-gradient(90deg, rgba(255, 79, 109, 0.55), rgba(255, 79, 109, 0.15) var(--e), rgba(0, 229, 155, 0.15) var(--e), rgba(0, 229, 155, 0.55)); }
+.rail .m { position: absolute; top: -4px; width: 2px; height: 16px; background: var(--muted); }
+.rail .m span { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font-size: 9.5px; color: var(--muted); white-space: nowrap; }
+.rail .m.up span { top: -15px; }
+.rail .now { position: absolute; top: -5px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--text); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--text), 0 0 14px rgba(255, 255, 255, 0.4); }
+.posc .meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 11.5px; color: var(--muted); }
+.posc .meta b { display: block; color: var(--text); font-weight: 500; }
+
+/* journal filters */
+.filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.filters button, .btn {
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--line-2); border-radius: 7px;
+  padding: 5px 10px; font: 500 11px var(--mono); letter-spacing: 0.06em; cursor: pointer; text-decoration: none;
+}
+.filters button.on { color: var(--text); border-color: var(--green); }
+.btn:hover, .filters button:hover { color: var(--text); }
+
+.rules { margin-top: 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.rule { border: 1px dashed var(--line-2); border-radius: 12px; padding: 12px 14px; color: var(--muted); font-size: 11.5px; }
+.rule b { display: block; color: var(--text); font: 700 15px var(--display); margin-bottom: 2px; }
+footer { color: var(--dim); text-align: center; font-size: 11px; margin-top: 26px; letter-spacing: 0.2em; }
+
+@media (max-width: 1100px) {
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .wrap, .bar { padding-left: 16px; padding-right: 16px; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi .value { font-size: 20px; }
+  .brand h1 { font-size: 16px; }
+  .rules { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="logo">Z</div>
+      <div>
+        <h1><span class="z">ZORRA</span> TERMINAL</h1>
+        <div class="by">BY <b>ZIUZ</b></div>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="tabs" id="tabs">
+      <button data-view="live" class="on">LIVE</button>
+      <button data-view="backtest">BACKTEST</button>
+    </div>
+    <div class="updated" id="updated">menghubungkan…</div>
+  </div>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-head"><h2>Equity Curve</h2><span class="hint" id="eqHint"></span></div>
+      <div class="panel-body"><div class="chart" id="equity"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>R Distribution</h2><span class="hint" id="rHint"></span></div>
+      <div class="panel-body">
+        <div class="hist" id="hist"></div>
+        <div id="byTf"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-head"><h2>Market Scanner</h2><span class="hint" id="scanHint"></span></div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>Coin</th><th class="num">Price</th><th class="num">Chg</th><th>Trend</th>
+          <th class="num">ADX</th><th class="num">RSI</th><th class="num">ATR%</th><th class="num">RS vs BTC</th><th>Status</th>
+        </tr></thead>
+        <tbody id="scanner"></tbody>
+      </table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Open Positions</h2><span class="hint" id="posHint"></span></div>
+      <div class="panel-body" id="positions"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:12px">
+    <div class="panel-head">
+      <h2>Signal Journal</h2>
+      <div class="filters" id="filters">
+        <button data-f="all" class="on">ALL</button>
+        <button data-f="win">WIN</button>
+        <button data-f="loss">LOSS</button>
+        <button data-f="scratch">SCRATCH</button>
+        <button data-f="open">OPEN</button>
+        <a class="btn" id="csv" href="/api/journal.csv">⇩ CSV</a>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Time</th><th>Coin</th><th>TF</th><th>Setup</th><th class="num">Entry</th><th class="num">SL</th>
+        <th class="num">TP</th><th class="num">Score</th><th>Status</th><th class="num">R</th><th>Exit</th>
+      </tr></thead>
+      <tbody id="journal"></tbody>
+    </table></div>
+  </div>
+
+  <section class="rules" id="rules"></section>
+  <footer>ZORRA TERMINAL · BY ZIUZ · SPOT LONG-ONLY · BUKAN SARAN KEUANGAN</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let STATE = null, VIEW = "live", FILTER = "all";
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function px(v) {
+  if (v === null || v === undefined || isNaN(v)) return "–";
+  const a = Math.abs(v);
+  const d = a >= 1000 ? 2 : a >= 1 ? 4 : a >= 0.01 ? 5 : 8;
+  return Number(v).toLocaleString("en-US", { minimumFractionDigits: Math.min(d, 2), maximumFractionDigits: d });
+}
+const money = (v) => v == null ? "–" : "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const sign = (v, d = 2, suf = "") => {
+  if (v == null || isNaN(v)) return "–";
+  const t = Number(v).toFixed(d);
+  if (Number(t) === 0) return (0).toFixed(d) + suf;  // no "-0.00"
+  return (v > 0 ? "+" : "") + t + suf;
+};
+const cls = (v) => v > 0 ? "pos" : v < 0 ? "neg" : "mut";
+const ago = (iso) => {
+  if (!iso) return "–";
+  const s = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (s < 60) return Math.max(0, Math.round(s)) + " dtk lalu";
+  if (s < 3600) return Math.round(s / 60) + " mnt lalu";
+  if (s < 86400) return Math.round(s / 3600) + " jam lalu";
+  return Math.round(s / 86400) + " hari lalu";
+};
+const fmtTime = (iso) => {
+  if (!iso) return "–";
+  const d = new Date(String(iso).replace(" ", "T"));
+  return isNaN(d) ? esc(iso) : d.toLocaleString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+};
+
+function source() {
+  if (!STATE) return null;
+  if (VIEW === "backtest") {
+    const b = STATE.backtest;
+    if (!b) return { empty: true };
+    return { records: b.records || [], stats: b.stats || {}, curve: b.equity_curve || [], summary: b.summary || {}, meta: b };
+  }
+  const s = STATE.snapshot || {};
+  return { records: STATE.journal || [], stats: STATE.stats || {}, curve: s.equity_curve || [], meta: s };
+}
+
+function renderHeader() {
+  const s = STATE.snapshot || {};
+  const chips = [];
+  if (s.mode) chips.push(`<span class="chip ${s.mode === "LIVE" ? "bad" : "warn"}"><span class="dot live"></span>${s.mode === "LIVE" ? "LIVE TRADING" : "PAPER MODE"}</span>`);
+  if (s.btc_up != null) chips.push(`<span class="chip ${s.btc_up ? "good" : "bad"}"><span class="dot"></span>BTC REGIME <b>${s.btc_up ? "RISK-ON" : "RISK-OFF"}</b></span>`);
+  if (s.tf) chips.push(`<span class="chip">TF <b>${esc(s.tf)}</b> · TREND <b>${esc(s.trend_tf)}</b></span>`);
+  if (s.config) chips.push(`<span class="chip">MIN RR <b>${s.config.min_rr}</b></span>`);
+  $("chips").innerHTML = chips.join("") || `<span class="chip warn"><span class="dot live"></span>MENUNGGU BOT</span>`;
+
+  const rows = s.scanner || [];
+  const items = rows.map((r) => `<span class="tick">${esc(r.coin)}<b>${px(r.price)}</b><span class="${cls(r.change)}">${sign(r.change, 2, "%")}</span></span>`).join("");
+  $("ticker").innerHTML = items ? items + items : `<span class="tick">Belum ada data market — jalankan <b>python main.py</b></span>`;
+  $("updated").textContent = s.updated_at ? "update " + ago(s.updated_at) : "bot belum menulis snapshot";
+}
+
+function renderKpis(src) {
+  const st = src.stats || {};
+  const cards = [];
+  if (VIEW === "live") {
+    const s = src.meta || {};
+    const ret = s.start_equity ? (s.equity / s.start_equity - 1) * 100 : null;
+    cards.push(["Equity", money(s.equity), ret == null ? "–" : `<span class="${cls(ret)}">${sign(ret, 2, "%")}</span> sejak start`, "var(--cyan)"]);
+  } else {
+    const sm = src.summary || {};
+    cards.push(["Return", `<span class="${cls(sm.return_pct)}">${sign(sm.return_pct, 2, "%")}</span>`, `Max DD <span class="neg">${sm.max_drawdown_pct ?? "–"}%</span>`, "var(--cyan)"]);
+  }
+  cards.push(["Total R", `<span class="${cls(st.sum_r)}">${sign(st.sum_r ?? 0)}R</span>`, `${st.trades ?? 0} trade selesai`, st.sum_r >= 0 ? "var(--green)" : "var(--red)"]);
+  cards.push(["Win Rate", `${st.win_rate ?? 0}%`, `best ${sign(st.best_r ?? 0)}R · worst ${sign(st.worst_r ?? 0)}R`, "var(--violet)"]);
+  cards.push(["Profit Factor", st.profit_factor == null ? "–" : st.profit_factor, st.profit_factor >= 1.5 ? "sehat" : st.profit_factor >= 1 ? "tipis" : "perlu perbaikan", "var(--amber)"]);
+  cards.push(["Avg R / Trade", `<span class="${cls(st.avg_r)}">${sign(st.avg_r ?? 0)}R</span>`, `loss streak maks ${st.loss_streak ?? 0}`, "var(--green)"]);
+  const max = (STATE.snapshot?.config || {}).max_open ?? 3;
+  cards.push(["Open", `${st.open ?? 0}<span class="mut" style="font-size:15px"> / ${max}</span>`, VIEW === "live" ? "posisi aktif" : "masih jalan di akhir data", "var(--cyan)"]);
+  $("kpis").innerHTML = cards.map(([l, v, sub, acc]) => `<div class="kpi" style="--accent:${acc}"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${sub}</div></div>`).join("");
+}
+
+function renderEquity(curve) {
+  const el = $("equity");
+  if (!curve || curve.length < 2) {
+    el.innerHTML = `<div class="empty">Kurva equity muncul setelah beberapa siklus scan.<br>Untuk melihat histori, jalankan <b>python main.py --backtest</b> lalu buka tab BACKTEST.</div>`;
+    $("eqHint").textContent = "";
+    return;
+  }
+  // draw at the real pixel width so axis text is never stretched on small screens
+  const W = Math.max(280, Math.round(el.clientWidth || 900)), H = 250, P = { l: 8, r: 64, t: 12, b: 22 };
+  const ys = curve.map((p) => p[1]);
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  if (hi === lo) { hi += 1; lo -= 1; }
+  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+  const x = (i) => P.l + (i / (curve.length - 1)) * (W - P.l - P.r);
+  const y = (v) => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
+  const up = ys[ys.length - 1] >= ys[0];
+  const col = up ? "var(--green)" : "var(--red)";
+  const line = curve.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join("");
+  const area = `${line}L${x(curve.length - 1).toFixed(1)},${H - P.b}L${x(0).toFixed(1)},${H - P.b}Z`;
+  const grid = [0, 0.25, 0.5, 0.75, 1].map((f) => {
+    const v = lo + (hi - lo) * f, yy = y(v);
+    return `<line x1="${P.l}" x2="${W - P.r}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-dasharray="3 5"/><text x="${W - P.r + 8}" y="${yy + 4}" fill="var(--muted)" font-size="11">${Math.round(v).toLocaleString("en-US")}</text>`;
+  }).join("");
+  const base = y(ys[0]);
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">
+    <defs><linearGradient id="eqg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${up ? "#00e59b" : "#ff4f6d"}" stop-opacity="0.35"/><stop offset="1" stop-color="${up ? "#00e59b" : "#ff4f6d"}" stop-opacity="0"/></linearGradient></defs>
+    ${grid}
+    <line x1="${P.l}" x2="${W - P.r}" y1="${base}" y2="${base}" stroke="var(--dim)"/>
+    <path d="${area}" fill="url(#eqg)"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/>
+    <line id="cross" y1="${P.t}" y2="${H - P.b}" stroke="var(--muted)" stroke-dasharray="2 3" style="display:none"/>
+    <circle id="crossDot" r="4" fill="${col}" style="display:none"/>
+    <text x="${P.l}" y="${H - 4}" fill="var(--muted)" font-size="11">${W < 420 ? "" : fmtTime(curve[0][0])}</text>
+    <text x="${W - P.r}" y="${H - 4}" fill="var(--muted)" font-size="11" text-anchor="end">${fmtTime(curve[curve.length - 1][0])}</text>
+  </svg><div class="tip" id="eqTip"></div>`;
+  const chg = (ys[ys.length - 1] / ys[0] - 1) * 100;
+  $("eqHint").innerHTML = `<span class="${cls(chg)}">${sign(chg, 2, "%")}</span> · ${curve.length} titik`;
+
+  const svg = el.querySelector("svg"), tip = $("eqTip"), cross = svg.querySelector("#cross"), dot = svg.querySelector("#crossDot");
+  svg.addEventListener("mousemove", (ev) => {
+    const r = svg.getBoundingClientRect();
+    const fx = ((ev.clientX - r.left) / r.width) * W;
+    const i = Math.max(0, Math.min(curve.length - 1, Math.round(((fx - P.l) / (W - P.l - P.r)) * (curve.length - 1))));
+    const cx = x(i), cy = y(curve[i][1]);
+    cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.style.display = "";
+    dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.style.display = "";
+    tip.style.display = "block";
+    tip.style.left = (cx / W) * r.width + "px";
+    tip.style.top = (cy / H) * r.height + "px";
+    tip.innerHTML = `<b>${money(curve[i][1])}</b> <span class="mut">${fmtTime(curve[i][0])}</span>`;
+  });
+  svg.addEventListener("mouseleave", () => { tip.style.display = "none"; cross.style.display = "none"; dot.style.display = "none"; });
+}
+
+function renderHist(records, stats) {
+  const rs = records.filter((r) => r.R != null).map((r) => Number(r.R));
+  const bins = [[-99, -1.5, "≤-1.5"], [-1.5, -0.5, "-1"], [-0.5, 0.5, "0"], [0.5, 1.5, "+1"], [1.5, 2.5, "+2"], [2.5, 3.5, "+3"], [3.5, 5, "+4"], [5, 999, "5+"]];
+  const counts = bins.map(([a, b]) => rs.filter((v) => v > a && v <= b).length);
+  const mx = Math.max(1, ...counts);
+  $("hist").innerHTML = rs.length ? bins.map(([a, b, lab], i) => {
+    const color = b <= -0.5 ? "var(--red)" : a >= 0.5 ? "var(--green)" : "var(--amber)";
+    return `<div class="col"><span class="n">${counts[i] || ""}</span><div class="b" style="height:${(counts[i] / mx) * 100}%;background:${color};opacity:${counts[i] ? 0.85 : 0.15}"></div><span class="x">${lab}</span></div>`;
+  }).join("") : `<div class="empty" style="width:100%">Belum ada trade selesai.</div>`;
+  $("rHint").textContent = rs.length ? `${rs.length} trade` : "";
+
+  const tf = stats.by_tf || {};
+  const keys = Object.keys(tf);
+  const m = Math.max(1, ...keys.map((k) => Math.abs(tf[k])));
+  $("byTf").innerHTML = keys.length ? `<div class="mut" style="margin-top:16px;font-size:10.5px;letter-spacing:.16em">R PER TIMEFRAME</div>` + keys.map((k) => {
+    const v = tf[k], w = (Math.abs(v) / m) * 50;
+    const left = v >= 0 ? 50 : 50 - w;
+    return `<div class="tfrow"><span>${esc(k)}</span><div class="tfbar"><i style="left:${left}%;width:${w}%;background:${v >= 0 ? "var(--green)" : "var(--red)"}"></i></div><span class="num ${cls(v)}" style="text-align:right">${sign(v)}R</span></div>`;
+  }).join("") : "";
+}
+
+function renderScanner() {
+  const rows = STATE.snapshot?.scanner || [];
+  const sigs = rows.filter((r) => r.signal).length;
+  $("scanHint").innerHTML = rows.length ? `${rows.length} market · <span class="${sigs ? "pos" : "mut"}">${sigs} sinyal</span>` : "";
+  if (!rows.length) {
+    $("scanner").innerHTML = `<tr><td colspan="9"><div class="empty">Scanner belum berjalan. Jalankan <b>python main.py</b>.</div></td></tr>`;
+    return;
+  }
+  const sorted = [...rows].sort((a, b) => (b.signal ? 1 : 0) - (a.signal ? 1 : 0));
+  $("scanner").innerHTML = sorted.map((r) => {
+    const rsiCol = r.rsi > 70 ? "var(--red)" : r.rsi < 35 ? "var(--amber)" : "var(--green)";
+    const status = r.signal
+      ? `<span class="sig">▲ ${esc(r.signal.setup.toUpperCase())} · RR ${r.signal.rr} · ${r.signal.score}</span>`
+      : `<span class="reason">${esc(r.status)}</span>`;
+    return `<tr>
+      <td class="coin">${esc(r.coin)}</td>
+      <td class="num">${px(r.price)}</td>
+      <td class="num ${cls(r.change)}">${sign(r.change, 2, "%")}</td>
+      <td><span class="pill ${r.trend}">${r.trend === "up" ? "▲ UP" : "▼ DOWN"}${r.trend_strong ? " +" : ""}</span></td>
+      <td class="num">${r.adx ?? "–"}<span class="meter"><i style="width:${Math.min(100, (r.adx || 0) * 2)}%;background:${r.adx >= 20 ? "var(--cyan)" : "var(--dim)"}"></i></span></td>
+      <td class="num">${r.rsi ?? "–"}<span class="meter"><i style="width:${r.rsi || 0}%;background:${rsiCol}"></i></span></td>
+      <td class="num">${r.atr_pct ?? "–"}</td>
+      <td class="num ${cls(r.rs)}">${r.rs == null ? "–" : sign(r.rs, 2, "%")}</td>
+      <td>${status}</td></tr>`;
+  }).join("");
+}
+
+function renderPositions() {
+  const ps = STATE.snapshot?.positions || [];
+  $("posHint").textContent = ps.length ? `${ps.length} aktif` : "";
+  if (!ps.length) {
+    $("positions").innerHTML = `<div class="empty">Tidak ada posisi terbuka.<br>Bot hanya masuk saat RR ≥ ${STATE.snapshot?.config?.min_rr ?? 2} dan semua filter lolos.</div>`;
+    return;
+  }
+  $("positions").innerHTML = ps.map((p) => {
+    const lo = p.initial_stop, hi = p.target, span = hi - lo || 1;
+    const pct = (v) => Math.max(0, Math.min(100, ((v - lo) / span) * 100));
+    return `<div class="posc">
+      <div class="top"><span class="coin">${esc(p.coin)}<small>${p.partial ? "TP1 ✓ · trailing" : "running"}</small></span><span class="r ${cls(p.r_now)}">${sign(p.r_now)}R</span></div>
+      <div class="rail" style="--e:${pct(p.entry)}%">
+        <div class="m up" style="left:${pct(p.stop)}%;background:var(--red)"><span>SL</span></div>
+        <div class="m" style="left:${pct(p.entry)}%"><span>IN</span></div>
+        <div class="m up" style="left:${pct(p.tp1)}%;background:var(--cyan)"><span>TP1</span></div>
+        <div class="m" style="left:100%;background:var(--green)"><span>TP</span></div>
+        <div class="now" style="left:${pct(p.price)}%"></div>
+      </div>
+      <div class="meta">
+        <div>Entry<b>${px(p.entry)}</b></div><div>Stop<b class="neg">${px(p.stop)}</b></div><div>Target<b class="pos">${px(p.target)}</b></div>
+        <div>Harga<b>${px(p.price)}</b></div><div>PnL<b class="${cls(p.pnl)}">${money(p.pnl)}</b></div><div>Dibuka<b>${fmtTime(p.opened_at)}</b></div>
+      </div></div>`;
+  }).join("");
+}
+
+function renderJournal(records) {
+  const rows = [...records].reverse().filter((r) => FILTER === "all" || r.status === FILTER);
+  $("csv").href = VIEW === "live" ? "/api/journal.csv" : "/api/backtest.csv";
+  $("journal").innerHTML = rows.length ? rows.slice(0, 300).map((r) => `<tr>
+      <td class="mut">${fmtTime(r.time)}</td>
+      <td class="coin">${esc(r.coin)}</td>
+      <td>${esc(r.tf)}</td>
+      <td class="mut">${esc(r.setup || r.exitMode || "")}</td>
+      <td class="num">${px(r.entry)}</td>
+      <td class="num neg">${px(r.sl)}</td>
+      <td class="num pos">${px(r.tp)}</td>
+      <td class="num">${r.score ?? "–"}</td>
+      <td><span class="pill ${esc(r.status)}">${esc(String(r.status).toUpperCase())}</span></td>
+      <td class="num ${cls(r.R)}">${r.R == null ? "–" : sign(Number(r.R)) + "R"}</td>
+      <td class="mut">${fmtTime(r.exitTime)}</td></tr>`).join("")
+    : `<tr><td colspan="11"><div class="empty">Belum ada catatan${FILTER !== "all" ? " untuk filter ini" : ""}.</div></td></tr>`;
+}
+
+function renderRules() {
+  const c = STATE.snapshot?.config;
+  if (!c) { $("rules").innerHTML = ""; return; }
+  $("rules").innerHTML = [
+    [`RR ≥ ${c.min_rr}`, `target ${c.target_rr}R, dipotong ke resistance; sinyal dibuang kalau ruang kurang`],
+    [`${(c.risk_per_trade * 100).toFixed(1)}% / trade`, `maks ${c.max_open} posisi, cooldown setelah loss, stop harian 3%`],
+    [`Score ≥ ${c.min_score}`, `trend, ADX, volume, MACD, RSI, relative strength vs BTC`],
+    [c.btc_filter ? "BTC filter ON" : "BTC filter OFF", "altcoin hanya dibeli saat trend BTC naik"],
+  ].map(([t, d]) => `<div class="rule"><b>${t}</b>${d}</div>`).join("");
+}
+
+function render() {
+  if (!STATE) return;
+  renderHeader();
+  const src = source();
+  if (src.empty) {
+    $("kpis").innerHTML = `<div class="kpi" style="grid-column:1/-1"><div class="label">Backtest</div><div class="sub" style="font-size:13px;margin-top:8px">Belum ada hasil backtest. Jalankan <b style="color:var(--text)">python main.py --backtest</b>, lalu refresh halaman ini.</div></div>`;
+    renderEquity([]); renderHist([], {}); renderJournal([]);
+  } else {
+    renderKpis(src); renderEquity(src.curve); renderHist(src.records, src.stats); renderJournal(src.records);
+  }
+  renderScanner(); renderPositions(); renderRules();
+}
+
+async function load() {
+  try {
+    const r = await fetch("/api/state", { cache: "no-store" });
+    STATE = await r.json();
+    render();
+  } catch (e) {
+    $("updated").textContent = "koneksi ke bot terputus — mencoba lagi…";
+  }
+}
+
+$("tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  VIEW = b.dataset.view;
+  [...$("tabs").children].forEach((x) => x.classList.toggle("on", x === b));
+  render();
+});
+$("filters").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  FILTER = b.dataset.f;
+  [...$("filters").querySelectorAll("button")].forEach((x) => x.classList.toggle("on", x === b));
+  render();
+});
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+load();
+setInterval(load, 5000);
+</script>
+</body>
+</html>
