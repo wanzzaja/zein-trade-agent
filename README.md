@@ -12,8 +12,10 @@ zein-trade-agent/
       backtest.py      # backtest bar-per-bar dengan logika yang sama dengan live
       journal.py       # jurnal sinyal (format kolom sama dengan export ZIUZ)
       dashboard.py     # server web Zorra Terminal (tanpa dependency tambahan)
+      meme.py          # meme coin screener (SOL, BSC, Base, ETH)
       utils.py         # data market + indikator
   ui/index.html        # tampilan Zorra Terminal
+  tests/               # python -m unittest discover tests
   data/                # log, state, jurnal, snapshot, hasil backtest
 ```
 
@@ -27,6 +29,33 @@ rail SL → entry → TP1 → TP, jurnal sinyal dengan filter dan export CSV, se
 - `python main.py --ui` membuka dashboard saja (membaca file di `data/`).
 - Untuk akses dari HP/VPS, set `UI_HOST=0.0.0.0`. Dashboard tidak punya login, jadi jangan buka ke
   internet publik tanpa proteksi (firewall, VPN, atau reverse proxy dengan password).
+
+## Meme Screener (Solana, BNB Chain, Base, Ethereum)
+
+Menu **MEME SCREENER** di dashboard (atau `python main.py --meme`) mencari meme coin berkualitas:
+
+1. **Penemuan**: pool trending & baru (GeckoTerminal) + token yang dipromosikan/di-boost (DexScreener).
+2. **Filter pasar**: likuiditas ≥ $15k, market cap $50k–$30M, umur 2 jam–90 hari, volume 24j ≥ $20k,
+   ≥ 150 transaksi. Token di bawah 2 jam dilewati karena itu zona sniper dan rug.
+3. **Cek keamanan**: GoPlus + simulasi beli/jual honeypot.is untuk BSC/Base/ETH, RugCheck untuk Solana.
+4. **Skor 0–100**: keamanan kontrak 35, distribusi holder 25, likuiditas 15, momentum 20, komunitas 5.
+   Grade A ≥ 85, B ≥ 70, C ≥ 55.
+
+**Langsung ditolak** (red flag): honeypot, pajak > 10%, mint/freeze authority aktif, owner masih bisa
+mint/pause/ubah pajak, kontrak tidak terverifikasi, fungsi berbahaya (hidden owner, ubah saldo,
+selfdestruct), creator pernah membuat honeypot, LP terkunci < 50%, top 10 holder > 45%, satu wallet > 15%,
+dev > 10%, token sudah di-rug.
+
+Top holder dihitung **tanpa** pool LP, alamat burn dan token yang dikunci, supaya angkanya mencerminkan
+whale sungguhan. Momentum memakai rasio beli/jual 1 jam, akselerasi volume (1 jam vs rata-rata 24 jam),
+turnover (volume > 30x likuiditas = indikasi wash trading), tren harga dan jumlah pembeli unik.
+
+Ada juga **cek token manual**: paste contract address untuk dicek lengkap. Semua ambang bisa diubah lewat
+env `MEME_*` (lihat `agent/config.py`). `MEME_AUTO_MINUTES=30` membuat bot live ikut scan otomatis.
+
+> Skor mengukur kualitas dan risiko, **bukan ramalan harga**. Kebanyakan meme coin tetap berakhir di nol.
+> Pakai uang yang siap hilang, ambil profit bertahap, dan cek ulang sendiri sebelum membeli.
+> API yang dipakai versi gratis dengan rate limit, jadi satu scan butuh sekitar 2–4 menit.
 
 ## Cara kerja signal scanner
 
@@ -61,6 +90,8 @@ python main.py --backtest     # uji di ~6000 candle 4h terakhir
 python main.py --scan         # scan sekali
 python main.py                # loop live + dashboard di http://127.0.0.1:8787
 python main.py --ui           # dashboard saja
+python main.py --meme         # meme screener di terminal (--chains solana,bsc,base,ethereum)
+python -m unittest discover tests
 ```
 
 Semua parameter bisa diubah lewat env (lihat `agent/config.py`). Jalankan `--backtest` dulu setiap

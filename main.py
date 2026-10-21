@@ -4,6 +4,7 @@
   python main.py --scan       # scan once and print signals
   python main.py --backtest   # backtest on recent history (also shown in the dashboard)
   python main.py --ui         # dashboard only, reads the files the bot wrote
+  python main.py --meme       # meme coin screener (Solana, BNB Chain, Base, Ethereum)
 """
 import argparse
 import time
@@ -11,6 +12,7 @@ from datetime import datetime, timezone
 
 from agent.backtest import run_backtest, summarize
 from agent.config import CONFIG, MARKET_SYMBOLS
+from agent import meme
 from agent.dashboard import serve
 from agent.journal import Journal, read_json, write_json
 from agent.strategy import scan, snapshot
@@ -127,6 +129,7 @@ def live():
     log.info(f"agent started mode={'PAPER' if is_paper() else 'LIVE'} tokens={CONFIG.tokens}")
     # never re-process the bar a position was opened on (e.g. after a restart)
     last_bar = {t: p.opened_at for t, p in positions.items()}
+    last_meme_scan = 0.0
 
     while True:
         signals, frames, prices, rows = scan_all()
@@ -181,6 +184,9 @@ def live():
         btc_frame = frames.get(CONFIG.btc_token)
         btc_up = bool(btc_frame["htf_up"].iloc[-1]) if btc_frame is not None else None
         snap = write_snapshot(snap, rows, positions, prices, equity, cash, btc_up)
+        if CONFIG.meme_auto_minutes and time.time() - last_meme_scan >= CONFIG.meme_auto_minutes * 60:
+            if meme.start_scan_async(CONFIG, log=log):
+                last_meme_scan = time.time()
         time.sleep(CONFIG.scan_interval_sec)
 
 
@@ -207,6 +213,23 @@ def backtest(bars):
     return stats
 
 
+def meme_cli(chains):
+    log.info(f"meme scan on {chains} (takes a few minutes because of free API rate limits)")
+    data = meme.run_scan(CONFIG, chains, log) or {}
+    passed = [r for r in data.get("results", []) if r["verdict"] == "pass"]
+    print(f"\n{'GRADE':<6}{'SCORE':>6}  {'CHAIN':<5} {'TOKEN':<12}{'MCAP':>12}{'LIQ':>11}{'TOP10':>7}{'DEV':>6}{'LP':>6}  TAGS")
+    for r in passed:
+        s = r["security"] or {}
+        fmt = lambda v, suf="%": "-" if v is None else f"{v:.0f}{suf}"
+        print(f"{r['grade']:<6}{r['score']:>6}  {r['chain_label']:<5} {r['symbol'][:11]:<12}"
+              f"{r['mcap']:>12,.0f}{r['liquidity']:>11,.0f}{fmt(s.get('top10_pct')):>7}{fmt(s.get('dev_pct')):>6}"
+              f"{fmt(s.get('lp_locked_pct')):>6}  {' '.join(r['tags'])}")
+    print(f"\n{len(passed)} lolos dari {data.get('counts', {}).get('checked', 0)} yang dicek; "
+          f"detail di dashboard: python main.py --ui")
+    for e in data.get("errors", []):
+        print("!", e)
+
+
 def save_backtest(trades, curve, still_open, index):
     step = max(1, len(curve) // MAX_EQUITY_POINTS)
     write_json(CONFIG.backtest_file, {
@@ -223,6 +246,8 @@ if __name__ == "__main__":
     ap.add_argument("--scan", action="store_true")
     ap.add_argument("--backtest", action="store_true")
     ap.add_argument("--ui", action="store_true")
+    ap.add_argument("--meme", action="store_true")
+    ap.add_argument("--chains", default=",".join(CONFIG.meme_chains))
     ap.add_argument("--bars", type=int, default=6000)
     args = ap.parse_args()
     if args.backtest:
@@ -232,6 +257,8 @@ if __name__ == "__main__":
         for r in rows:
             print(f"{r['coin']:>6} {r['price']:>12.4f}  {r['status']}")
         print("\n".join(s.describe() for s in sigs) or "no signal passed the filters")
+    elif args.meme:
+        meme_cli(args.chains.split(","))
     elif args.ui:
         serve(CONFIG, log, background=False)
     else:

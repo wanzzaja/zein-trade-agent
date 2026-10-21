@@ -197,6 +197,115 @@ footer { color: var(--dim); text-align: center; font-size: 11px; margin-top: 26p
   .brand h1 { font-size: 16px; }
   .rules { grid-template-columns: minmax(0, 1fr); }
 }
+/* ---------- navigation ---------- */
+.nav { display: inline-flex; gap: 4px; border: 1px solid var(--line-2); border-radius: 10px; padding: 3px; background: var(--panel); }
+.nav button {
+  border: 0; background: transparent; color: var(--muted); font: 700 11.5px var(--mono); letter-spacing: 0.14em;
+  padding: 8px 14px; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+}
+.nav button.on { color: #02140d; background: linear-gradient(135deg, var(--green), var(--cyan)); box-shadow: 0 0 18px rgba(0, 229, 155, 0.35); }
+.nav .new { font-size: 9px; padding: 1px 5px; border-radius: 4px; background: var(--violet); color: #fff; letter-spacing: 0.08em; }
+.nav button.on .new { background: #02140d; color: var(--green); }
+[hidden] { display: none !important; }
+
+/* ---------- meme screener ---------- */
+.warnc { color: var(--amber); }
+.mhero { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; margin-top: 22px; }
+.mhero .panel-body { display: flex; flex-direction: column; gap: 12px; }
+.mtitle { font: 700 22px var(--display); letter-spacing: 0.12em; margin: 0; }
+.mtitle span { color: var(--green); }
+.msub { color: var(--muted); font-size: 12px; margin-top: -6px; }
+.chainsel { display: flex; gap: 8px; flex-wrap: wrap; }
+.chainsel button {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 7px 12px; border-radius: 9px;
+  border: 1px solid var(--line-2); background: var(--panel-2); color: var(--muted); font: 700 12px var(--mono); letter-spacing: 0.08em;
+}
+.chainsel button i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); opacity: 0.35; }
+.chainsel button.on { color: var(--text); border-color: var(--c); box-shadow: inset 0 0 0 1px var(--c); }
+.chainsel button.on i { opacity: 1; box-shadow: 0 0 10px var(--c); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cta {
+  border: 0; cursor: pointer; padding: 10px 18px; border-radius: 10px; font: 700 12.5px var(--mono); letter-spacing: 0.12em;
+  color: #02140d; background: linear-gradient(135deg, var(--green), var(--cyan)); box-shadow: 0 0 22px rgba(0, 229, 155, 0.3);
+}
+.cta:disabled { opacity: 0.45; cursor: progress; box-shadow: none; }
+.input, .select {
+  background: var(--bg); color: var(--text); border: 1px solid var(--line-2); border-radius: 9px; padding: 9px 11px;
+  font: 12.5px var(--mono); min-width: 0;
+}
+.input { flex: 1 1 260px; }
+.input:focus, .select:focus { outline: none; border-color: var(--green); }
+.progress { height: 6px; background: var(--panel-2); border-radius: 99px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); transition: width 0.4s; }
+.progress.indet i { width: 35% !important; animation: indet 1.2s infinite ease-in-out; }
+@keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+.mstatus { color: var(--muted); font-size: 12px; }
+.mstatus b { color: var(--text); font-weight: 500; }
+.mbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 12px; }
+.toggle { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; cursor: pointer; user-select: none; }
+.toggle input { accent-color: var(--green); }
+.section-label { color: var(--muted); font-size: 10.5px; letter-spacing: 0.2em; margin: 18px 0 10px; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.mc {
+  position: relative; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line);
+  border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.mc.grade-A { border-color: rgba(0, 229, 155, 0.45); box-shadow: 0 0 0 1px rgba(0, 229, 155, 0.12), 0 10px 40px -20px rgba(0, 229, 155, 0.5); }
+.mc.rej { opacity: 0.72; border-color: rgba(255, 79, 109, 0.35); }
+.mc-top { display: flex; gap: 11px; align-items: center; }
+.mc-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--panel-2); object-fit: cover; border: 1px solid var(--line-2); flex: none; display: grid; place-items: center; color: var(--muted); font-weight: 700; }
+.mc-id { min-width: 0; flex: 1; }
+.mc-sym { font: 700 16px var(--display); letter-spacing: 0.02em; display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.mc-name { color: var(--muted); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cbadge { font: 700 9.5px var(--mono); letter-spacing: 0.1em; padding: 2px 6px; border-radius: 5px; color: var(--c); border: 1px solid var(--c); }
+.ring {
+  --p: 0; --rc: var(--green); width: 54px; height: 54px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  background: conic-gradient(var(--rc) calc(var(--p) * 1%), var(--panel-2) 0);
+}
+.ring div { width: 44px; height: 44px; border-radius: 50%; background: var(--panel); display: grid; place-items: center; line-height: 1; }
+.ring b { font: 700 17px var(--display); color: var(--rc); }
+.ring small { font-size: 9.5px; color: var(--muted); margin-top: -10px; }
+.mgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 10px; }
+.mm > span { display: block; color: var(--muted); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+.mm b { font-weight: 500; font-size: 13px; white-space: nowrap; display: block; overflow: hidden; text-overflow: ellipsis; }
+.safety { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding: 9px; border-radius: 10px; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--line); }
+.safety .mm { text-align: center; }
+.safety .mm b { font-size: 12.5px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 10px; letter-spacing: 0.1em; padding: 3px 7px; border-radius: 5px; border: 1px solid var(--line-2); color: var(--muted); }
+.tag.EARLY { color: var(--cyan); border-color: rgba(56, 212, 255, 0.4); }
+.tag.FRESH { color: var(--violet); border-color: rgba(160, 124, 255, 0.4); }
+.tag.MOMENTUM { color: var(--green); border-color: rgba(0, 229, 155, 0.4); }
+.tag.SAFE { color: var(--green); border-color: rgba(0, 229, 155, 0.4); background: var(--green-soft); }
+.tag.WHALE { color: var(--amber); border-color: rgba(255, 184, 77, 0.4); }
+.reasons { margin: 0; padding: 9px 11px 9px 26px; border-radius: 10px; background: var(--red-soft); color: var(--red); font-size: 11.5px; }
+.mc-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 10px; }
+.links { display: flex; gap: 6px; flex-wrap: wrap; }
+.links a, .links button { font: 500 10.5px var(--mono); color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line-2); background: transparent; cursor: pointer; }
+.links a:hover, .links button:hover { color: var(--text); border-color: var(--muted); }
+.ctoggle { background: none; border: 0; color: var(--muted); font: 500 11px var(--mono); cursor: pointer; padding: 0; }
+.ctoggle b { color: var(--green); font-weight: 500; } .ctoggle em { color: var(--amber); font-style: normal; } .ctoggle u { color: var(--red); text-decoration: none; }
+.checks { display: grid; gap: 10px; font-size: 11.5px; }
+.checks h4 { margin: 0 0 4px; font-size: 9.5px; letter-spacing: 0.18em; color: var(--muted); font-weight: 500; text-transform: uppercase; }
+.ck { display: grid; grid-template-columns: 16px 1fr; gap: 6px; padding: 2px 0; }
+.ck .ic.pass { color: var(--green); } .ck .ic.warn { color: var(--amber); } .ck .ic.fail { color: var(--red); }
+.ck span b { font-weight: 500; color: var(--text); }
+.ck span { color: var(--muted); }
+.method { margin-top: 18px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.method .rule b { font-size: 13px; }
+.method .rule em { display: block; color: var(--green); font-style: normal; font-size: 18px; font-weight: 700; font-family: var(--display); }
+.warnbox { margin-top: 12px; border: 1px solid rgba(255, 184, 77, 0.35); background: var(--amber-soft); color: var(--amber); border-radius: 12px; padding: 12px 14px; font-size: 12px; }
+.err { color: var(--red); font-size: 12px; }
+@media (max-width: 1100px) {
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mhero { grid-template-columns: minmax(0, 1fr); }
+  .method { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .method { grid-template-columns: minmax(0, 1fr); }
+  .nav button { padding: 7px 10px; letter-spacing: 0.08em; }
+}
 </style>
 </head>
 <body>
@@ -209,12 +318,16 @@ footer { color: var(--dim); text-align: center; font-size: 11px; margin-top: 26p
         <div class="by">BY <b>ZIUZ</b></div>
       </div>
     </div>
+    <nav class="nav" id="nav">
+      <button data-page="terminal" class="on">TERMINAL</button>
+      <button data-page="meme">MEME SCREENER <span class="new">NEW</span></button>
+    </nav>
     <div class="chips" id="chips"></div>
   </div>
   <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
 </header>
 
-<div class="wrap">
+<div class="wrap" id="page-terminal">
   <div class="toolbar">
     <div class="tabs" id="tabs">
       <button data-view="live" class="on">LIVE</button>
@@ -279,6 +392,77 @@ footer { color: var(--dim); text-align: center; font-size: 11px; margin-top: 26p
 
   <section class="rules" id="rules"></section>
   <footer>ZORRA TERMINAL · BY ZIUZ · SPOT LONG-ONLY · BUKAN SARAN KEUANGAN</footer>
+</div>
+
+<div class="wrap" id="page-meme" hidden>
+  <section class="mhero">
+    <div class="panel">
+      <div class="panel-body">
+        <h2 class="mtitle"><span>MEME</span> SCREENER</h2>
+        <div class="msub">Cari meme coin berkualitas di Solana, BNB Chain, Base &amp; Ethereum: keamanan kontrak, distribusi holder, wallet dev, LP lock, likuiditas, dan momentum.</div>
+        <div class="chainsel" id="chainsel"></div>
+        <div class="row">
+          <button class="cta" id="scanBtn">▶ SCAN SEKARANG</button>
+          <span class="mstatus" id="mStatus">memuat…</span>
+        </div>
+        <div class="progress" id="mProgress" hidden><i></i></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-body">
+        <div class="section-label" style="margin:0">CEK TOKEN MANUAL</div>
+        <div class="row">
+          <select class="select" id="mcChain">
+            <option value="solana">Solana</option><option value="bsc">BNB Chain</option>
+            <option value="base">Base</option><option value="ethereum">Ethereum</option>
+          </select>
+          <input class="input" id="mcAddr" placeholder="paste contract address…" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="row">
+          <button class="cta" id="checkBtn">CEK TOKEN</button>
+          <span class="mstatus" id="checkMsg">Cek keamanan, holder &amp; momentum satu token.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kpis" id="mKpis" style="margin-top:12px"></section>
+
+  <div id="manualWrap" hidden>
+    <div class="section-label">HASIL CEK MANUAL</div>
+    <div class="cards" id="manualCards"></div>
+  </div>
+
+  <div class="mbar">
+    <div class="filters" id="gradeFilter">
+      <button data-g="all" class="on">SEMUA</button>
+      <button data-g="A">GRADE A</button>
+      <button data-g="AB">A + B</button>
+    </div>
+    <div class="row">
+      <label class="toggle"><input type="checkbox" id="showRej"> tampilkan yang ditolak</label>
+      <select class="select" id="mSort">
+        <option value="score">Urut: Skor</option>
+        <option value="mcap">Urut: Market cap terkecil</option>
+        <option value="age">Urut: Paling baru</option>
+        <option value="volume">Urut: Volume 24j</option>
+        <option value="momentum">Urut: Momentum 1j</option>
+      </select>
+    </div>
+  </div>
+  <div class="cards" id="memeCards"></div>
+
+  <div class="section-label" style="margin-top:26px">METODE PENILAIAN · SKOR 0–100</div>
+  <section class="method">
+    <div class="rule"><em>35</em><b>Keamanan kontrak</b>honeypot, pajak, owner renounced / mint &amp; freeze authority, fungsi berbahaya, LP burn/lock</div>
+    <div class="rule"><em>25</em><b>Distribusi holder</b>top 10 &amp; holder terbesar (tanpa LP/burn/lock), persentase wallet dev, jumlah holder, insider/bundle</div>
+    <div class="rule"><em>15</em><b>Likuiditas</b>kedalaman likuiditas, rasio likuiditas / market cap, market cap kecil = ruang naik</div>
+    <div class="rule"><em>20</em><b>Momentum</b>rasio beli/jual 1 jam, akselerasi volume, turnover (deteksi wash trading), tren harga, pembeli unik</div>
+    <div class="rule"><em>5</em><b>Komunitas</b>X / Telegram / website dan profil DexScreener</div>
+  </section>
+  <div class="warnbox"><b>Langsung ditolak:</b> honeypot, pajak &gt; 10%, mint/freeze authority aktif, owner bisa mint/pause/ubah pajak, kontrak tidak terverifikasi, LP terkunci &lt; 50%, top 10 &gt; 45%, satu wallet &gt; 15%, dev &gt; 10%, creator pernah membuat honeypot.
+    <br><br>Skor mengukur <b>kualitas &amp; risiko</b>, bukan ramalan harga. Kebanyakan meme coin tetap berakhir di nol. Gunakan uang yang siap hilang, ambil profit bertahap, dan selalu cek ulang sendiri sebelum beli.</div>
+  <footer>ZORRA TERMINAL · BY ZIUZ · DATA: DEXSCREENER · GECKOTERMINAL · GOPLUS · HONEYPOT.IS · RUGCHECK</footer>
 </div>
 
 <script>
@@ -553,9 +737,232 @@ $("filters").addEventListener("click", (e) => {
   render();
 });
 let resizeTimer;
-window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => PAGE === "meme" ? renderMeme() : render(), 150); });
 load();
 setInterval(load, 5000);
+// ================= MEME SCREENER =================
+const CHAIN_META = {
+  solana: { label: "SOL", name: "Solana", color: "#a07cff" },
+  bsc: { label: "BSC", name: "BNB Chain", color: "#f3ba2f" },
+  base: { label: "BASE", name: "Base", color: "#3b82ff" },
+  ethereum: { label: "ETH", name: "Ethereum", color: "#8fa4ff" },
+};
+const GROUPS = { market: "Pasar", security: "Keamanan kontrak", distribution: "Distribusi holder", liquidity: "Likuiditas", momentum: "Momentum", community: "Komunitas" };
+let PAGE = "terminal", MEME = null, MEME_GRADE = "all", MEME_SORT = "score", SHOW_REJ = false;
+const MEME_CHAINS = new Set(Object.keys(CHAIN_META));
+const OPEN_CARDS = new Set();
+
+// token names, icons and links come from public APIs: escape text, allow only http(s) URLs
+const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u)) ? esc(u) : null;
+const usd = (v) => {
+  if (v == null || isNaN(v)) return "–";
+  const a = Math.abs(v);
+  if (a >= 1e9) return "$" + (v / 1e9).toFixed(2) + "B";
+  if (a >= 1e6) return "$" + (v / 1e6).toFixed(2) + "M";
+  if (a >= 1e3) return "$" + (v / 1e3).toFixed(1) + "K";
+  return "$" + Number(v).toFixed(0);
+};
+const ageTxt = (h) => h == null ? "–" : h < 1 ? Math.round(h * 60) + " mnt" : h < 48 ? Math.round(h) + " jam" : Math.round(h / 24) + " hari";
+const pctTxt = (v, d = 1) => v == null ? "–" : Number(v).toFixed(d) + "%";
+const lowGood = (v, good, ok) => v == null ? "mut" : v <= good ? "pos" : v <= ok ? "warnc" : "neg";
+const highGood = (v, good, ok) => v == null ? "mut" : v >= good ? "pos" : v >= ok ? "warnc" : "neg";
+const gradeColor = (g) => ({ A: "var(--green)", B: "var(--cyan)", C: "var(--amber)" }[g] || "var(--red)");
+
+function memeCard(r) {
+  const s = r.security || {};
+  const cm = CHAIN_META[r.chain] || { label: r.chain_label, color: "#888" };
+  const rej = r.verdict !== "pass";
+  const key = r.chain + ":" + r.address;
+  const icon = safeUrl(r.icon);
+  const counts = { pass: 0, warn: 0, fail: 0 };
+  r.checks.forEach((c) => counts[c.status]++);
+  const tax = Math.max(s.buy_tax || 0, s.sell_tax || 0);
+  const tx = r.txns_h1 || {};
+  const ch = r.change || {};
+  const m = (label, value, k = "") => `<div class="mm"><span>${label}</span><b class="${k}">${value}</b></div>`;
+  const links = [
+    safeUrl(r.url) && `<a href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer">DexScreener</a>`,
+    safeUrl(r.explorer) && `<a href="${safeUrl(r.explorer)}" target="_blank" rel="noopener noreferrer">Explorer</a>`,
+    safeUrl(r.socials?.twitter) && `<a href="${safeUrl(r.socials.twitter)}" target="_blank" rel="noopener noreferrer">X</a>`,
+    safeUrl(r.socials?.telegram) && `<a href="${safeUrl(r.socials.telegram)}" target="_blank" rel="noopener noreferrer">TG</a>`,
+    safeUrl(r.socials?.website) && `<a href="${safeUrl(r.socials.website)}" target="_blank" rel="noopener noreferrer">Web</a>`,
+    `<button data-copy="${esc(r.address)}">⧉ CA</button>`,
+  ].filter(Boolean).join("");
+  const groups = {};
+  r.checks.forEach((c) => (groups[c.group] = groups[c.group] || []).push(c));
+  const checks = OPEN_CARDS.has(key) ? `<div class="checks">${Object.entries(groups).map(([g, list]) => `
+      <div><h4>${GROUPS[g] || esc(g)}</h4>${list.map((c) => `<div class="ck"><span class="ic ${c.status}">${c.status === "pass" ? "✓" : c.status === "warn" ? "!" : "✕"}</span><span><b>${esc(c.label)}</b> · ${esc(c.detail)}</span></div>`).join("")}</div>`).join("")}</div>` : "";
+  return `<article class="mc ${rej ? "rej" : "grade-" + r.grade}">
+    <div class="mc-top">
+      ${icon ? `<img class="mc-icon" src="${icon}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="mc-icon">${esc((r.symbol || "?").slice(0, 1))}</div>`}
+      <div class="mc-id">
+        <div class="mc-sym">${esc(r.symbol)} <span class="cbadge" style="--c:${cm.color}">${esc(cm.label)}</span> <span class="mut" style="font:400 11px var(--mono)">${ageTxt(r.age_h)}</span></div>
+        <div class="mc-name">${esc(r.name)}${r.dex ? " · " + esc(r.dex) : ""}</div>
+      </div>
+      <div class="ring" style="--p:${rej ? 100 : r.score};--rc:${gradeColor(r.grade)}"><div><b>${rej ? "✕" : esc(r.grade)}</b><small>${rej ? "tolak" : r.score}</small></div></div>
+    </div>
+    <div class="mgrid">
+      ${m("MCap", usd(r.mcap))}
+      ${m("Likuiditas", usd(r.liquidity) + ` <span class="mut" style="font-size:10.5px">${pctTxt(r.liq_ratio, 0)}</span>`)}
+      ${m("Vol 24j", usd(r.volume24))}
+      ${m("Δ 1j", sign(ch.h1, 1, "%"), cls(ch.h1))}
+      ${m("Δ 24j", sign(ch.h24, 1, "%"), cls(ch.h24))}
+      ${m("Beli/Jual 1j", `<span class="pos">${tx.buys ?? 0}</span>/<span class="neg">${tx.sells ?? 0}</span>`)}
+    </div>
+    <div class="safety">
+      ${m("Top10", pctTxt(s.top10_pct), lowGood(s.top10_pct, 15, 30))}
+      ${m("Dev", pctTxt(s.dev_pct, s.dev_pct != null && s.dev_pct < 1 ? 2 : 1), lowGood(s.dev_pct, 1, 5))}
+      ${m("LP lock", s.bonding_curve ? "curve" : pctTxt(s.lp_locked_pct, 0), s.bonding_curve ? "warnc" : highGood(s.lp_locked_pct, 95, 90))}
+      ${m("Pajak", s.buy_tax == null && s.sell_tax == null ? "–" : `${+(s.buy_tax || 0).toFixed(1)}/${+(s.sell_tax || 0).toFixed(1)}`, lowGood(tax, 1, 5))}
+      ${m("Holder", s.holders ? Number(s.holders).toLocaleString("en-US") : "–")}
+    </div>
+    ${rej ? `<ul class="reasons">${r.reasons.slice(0, 4).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`
+          : r.tags.length ? `<div class="tags">${r.tags.map((t) => `<span class="tag ${esc(t.split(" ")[0])}">${esc(t)}</span>`).join("")}</div>` : ""}
+    ${checks}
+    <div class="mc-foot">
+      <button class="ctoggle" data-toggle="${esc(key)}">${OPEN_CARDS.has(key) ? "▾" : "▸"} ${r.checks.length} cek · <b>${counts.pass}✓</b> <em>${counts.warn}!</em> <u>${counts.fail}✕</u></button>
+      <div class="links">${links}</div>
+    </div>
+  </article>`;
+}
+
+function sortedResults(list) {
+  const key = {
+    score: (r) => -r.score,
+    mcap: (r) => r.mcap,
+    age: (r) => r.age_h ?? 1e9,
+    volume: (r) => -r.volume24,
+    momentum: (r) => -((r.volume1h || 0) / Math.max(1, (r.volume24 || 0) / 24)),
+  }[MEME_SORT];
+  return [...list].sort((a, b) => (a.verdict === "pass" ? 0 : 1) - (b.verdict === "pass" ? 0 : 1) || key(a) - key(b));
+}
+
+function renderMeme() {
+  $("chainsel").innerHTML = Object.entries(CHAIN_META).map(([k, c]) =>
+    `<button data-chain="${k}" class="${MEME_CHAINS.has(k) ? "on" : ""}" style="--c:${c.color}"><i></i>${c.name}</button>`).join("");
+  if (!MEME) return;
+  const running = MEME.running || MEME.status === "scanning";
+  $("scanBtn").disabled = running;
+  $("scanBtn").textContent = running ? "⟳ SCANNING…" : "▶ SCAN SEKARANG";
+  const pg = MEME.progress || {};
+  const bar = $("mProgress");
+  bar.hidden = !running;
+  bar.classList.toggle("indet", running && pg.stage !== "security");
+  bar.firstElementChild.style.width = pg.total ? (pg.done / pg.total) * 100 + "%" : "0%";
+  const stage = { discover: "mencari token trending & baru", market: "mengambil data pasar", security: "cek keamanan kontrak & holder" }[pg.stage] || "memproses";
+  const errs = (MEME.errors || []).length;
+  $("mStatus").innerHTML = running
+    ? `<b>${stage}</b>${pg.stage === "security" ? ` · ${pg.done}/${pg.total}` : ""} · bisa 2–4 menit (limit API gratis)`
+    : MEME.updated_at ? `scan terakhir <b>${ago(MEME.updated_at)}</b>${errs ? ` · <span class="warnc" title="${esc((MEME.errors || []).join("\n"))}">${errs} sumber gagal</span>` : ""}`
+    : "belum pernah scan — tekan <b>SCAN SEKARANG</b>";
+
+  const c = MEME.counts || {};
+  const kpi = (l, v, sub, acc) => `<div class="kpi" style="--accent:${acc}"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${sub}</div></div>`;
+  const skipped = Object.entries(c.skipped || {}).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k, v]) => `${v} ${esc(k)}`).join(" · ");
+  $("mKpis").innerHTML = [
+    kpi("Ditemukan", c.discovered ?? 0, "trending, baru & dipromosikan", "var(--cyan)"),
+    kpi("Data pasar", c.with_market ?? 0, skipped || "sebelum filter pasar", "var(--violet)"),
+    kpi("Dicek keamanan", c.checked ?? 0, "lolos filter likuiditas/umur/volume", "var(--amber)"),
+    kpi("Lolos", `<span class="pos">${c.passed ?? 0}</span>`, "tanpa red flag", "var(--green)"),
+    kpi("Grade A", `<span class="pos">${c.grade_a ?? 0}</span>`, "skor ≥ 85", "var(--green)"),
+    kpi("Chain", [...MEME_CHAINS].map((k) => CHAIN_META[k].label).join(" · ") || "–", "filter tampilan", "var(--cyan)"),
+  ].join("");
+
+  const manual = (MEME.manual || []);
+  $("manualWrap").hidden = !manual.length;
+  $("manualCards").innerHTML = manual.slice(0, 3).map(memeCard).join("");
+
+  let list = (MEME.results || []).filter((r) => MEME_CHAINS.has(r.chain));
+  if (!SHOW_REJ) list = list.filter((r) => r.verdict === "pass");
+  if (MEME_GRADE === "A") list = list.filter((r) => r.grade === "A" || r.verdict !== "pass");
+  if (MEME_GRADE === "AB") list = list.filter((r) => "AB".includes(r.grade) || r.verdict !== "pass");
+  $("memeCards").innerHTML = list.length ? sortedResults(list).map(memeCard).join("")
+    : `<div class="panel" style="grid-column:1/-1"><div class="empty">${MEME.updated_at ? "Tidak ada token yang lolos filter ini. Coba <b>A + B</b>, centang <b>tampilkan yang ditolak</b>, atau scan ulang nanti — token berkualitas memang jarang." : "Tekan <b>SCAN SEKARANG</b> untuk mulai mencari meme coin."}</div></div>`;
+}
+
+async function loadMeme() {
+  try {
+    const r = await fetch("/api/meme", { cache: "no-store" });
+    MEME = await r.json();
+    renderMeme();
+  } catch (e) {
+    $("mStatus").textContent = "koneksi ke bot terputus — mencoba lagi…";
+  }
+}
+
+async function postJson(url, body) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || "request gagal (" + r.status + ")");
+  return data;
+}
+
+function setPage(p) {
+  PAGE = p === "meme" ? "meme" : "terminal";
+  $("page-terminal").hidden = PAGE !== "terminal";
+  $("page-meme").hidden = PAGE !== "meme";
+  [...$("nav").children].forEach((b) => b.classList.toggle("on", b.dataset.page === PAGE));
+  if (location.hash !== "#" + PAGE) history.replaceState(null, "", "#" + PAGE);
+  if (PAGE === "meme") { renderMeme(); loadMeme(); } else render();
+}
+
+$("nav").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setPage(b.dataset.page); });
+$("chainsel").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const k = b.dataset.chain;
+  if (MEME_CHAINS.has(k) && MEME_CHAINS.size > 1) MEME_CHAINS.delete(k); else MEME_CHAINS.add(k);
+  renderMeme();
+});
+$("gradeFilter").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  MEME_GRADE = b.dataset.g;
+  [...$("gradeFilter").children].forEach((x) => x.classList.toggle("on", x === b));
+  renderMeme();
+});
+$("showRej").addEventListener("change", (e) => { SHOW_REJ = e.target.checked; renderMeme(); });
+$("mSort").addEventListener("change", (e) => { MEME_SORT = e.target.value; renderMeme(); });
+$("page-meme").addEventListener("click", (e) => {
+  const t = e.target.closest("[data-toggle]");
+  if (t) { const k = t.dataset.toggle; OPEN_CARDS.has(k) ? OPEN_CARDS.delete(k) : OPEN_CARDS.add(k); renderMeme(); return; }
+  const c = e.target.closest("[data-copy]");
+  if (c) {
+    navigator.clipboard?.writeText(c.dataset.copy).then(() => { c.textContent = "✓ disalin"; setTimeout(() => (c.textContent = "⧉ CA"), 1200); });
+  }
+});
+$("scanBtn").addEventListener("click", async () => {
+  $("scanBtn").disabled = true;
+  try { await postJson("/api/meme/scan", { chains: [...MEME_CHAINS] }); } catch (err) { $("mStatus").innerHTML = `<span class="err">${esc(err.message)}</span>`; }
+  loadMeme();
+});
+async function checkToken() {
+  const address = $("mcAddr").value.trim();
+  if (!address) { $("checkMsg").innerHTML = `<span class="err">Isi contract address dulu.</span>`; return; }
+  $("checkBtn").disabled = true;
+  $("checkMsg").textContent = "mengecek… (5–15 detik)";
+  try {
+    const r = await postJson("/api/meme/check", { chain: $("mcChain").value, address });
+    OPEN_CARDS.add(r.chain + ":" + r.address);
+    $("checkMsg").innerHTML = r.verdict === "pass" ? `<span class="pos">${esc(r.symbol)}: grade ${esc(r.grade)} (${r.score})</span>` : `<span class="err">${esc(r.symbol)}: DITOLAK</span>`;
+    await loadMeme();
+    $("manualWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (err) {
+    $("checkMsg").innerHTML = `<span class="err">${esc(err.message)}</span>`;
+  }
+  $("checkBtn").disabled = false;
+}
+$("checkBtn").addEventListener("click", checkToken);
+$("mcAddr").addEventListener("keydown", (e) => { if (e.key === "Enter") checkToken(); });
+// broken token logos (dead CDN links) fall back to the symbol's first letter
+document.addEventListener("error", (e) => {
+  const img = e.target;
+  if (img.tagName !== "IMG" || !img.classList.contains("mc-icon")) return;
+  const d = document.createElement("div");
+  d.className = "mc-icon";
+  d.textContent = (img.closest(".mc")?.querySelector(".mc-sym")?.firstChild?.textContent || "?").trim().slice(0, 1);
+  img.replaceWith(d);
+}, true);
+setInterval(() => { if (PAGE === "meme") loadMeme(); }, 3000);
+setPage(location.hash.slice(1));
 </script>
 </body>
 </html>

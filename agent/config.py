@@ -90,6 +90,28 @@ class Config:
     snapshot_file: str = _env("SNAPSHOT_FILE", "data/snapshot.json")
     backtest_file: str = _env("BACKTEST_FILE", "data/backtest.json")
 
+    # --- meme coin screener (Solana, BNB Chain, Base, Ethereum) ---
+    meme_chains: list = field(default_factory=lambda: _env("MEME_CHAINS", "solana,bsc,base,ethereum").split(","))
+    meme_file: str = _env("MEME_FILE", "data/meme.json")
+    meme_min_liquidity: float = _env("MEME_MIN_LIQUIDITY", 15_000, float)
+    meme_min_mcap: float = _env("MEME_MIN_MCAP", 50_000, float)
+    meme_max_mcap: float = _env("MEME_MAX_MCAP", 30_000_000, float)  # above this, multi-x is unlikely
+    meme_min_age_hours: float = _env("MEME_MIN_AGE_HOURS", 2, float)    # first hours are sniper/rug territory
+    meme_max_age_days: float = _env("MEME_MAX_AGE_DAYS", 90, float)
+    meme_min_volume_24h: float = _env("MEME_MIN_VOLUME_24H", 20_000, float)
+    meme_min_txns_24h: int = _env("MEME_MIN_TXNS_24H", 150, int)
+    meme_max_checks: int = _env("MEME_MAX_CHECKS", 60, int)  # security lookups per scan (API rate limits)
+    meme_max_top10: float = _env("MEME_MAX_TOP10", 30, float)  # % held by top 10 (excl. LP/burn/locks)
+    meme_max_dev: float = _env("MEME_MAX_DEV", 5, float)       # % held by the creator
+    meme_min_lp_locked: float = _env("MEME_MIN_LP_LOCKED", 90, float)
+    meme_max_tax: float = _env("MEME_MAX_TAX", 5, float)
+    meme_auto_minutes: int = _env("MEME_AUTO_MINUTES", 0, int)  # 0 = only scan on request
+    dexscreener_url: str = _env("DEXSCREENER_URL", "https://api.dexscreener.com")
+    geckoterminal_url: str = _env("GECKOTERMINAL_URL", "https://api.geckoterminal.com/api/v2")
+    goplus_url: str = _env("GOPLUS_URL", "https://api.gopluslabs.io/api/v1")
+    rugcheck_url: str = _env("RUGCHECK_URL", "https://api.rugcheck.xyz/v1")
+    honeypot_url: str = _env("HONEYPOT_URL", "https://api.honeypot.is")
+
     # --- Zorra Terminal (web UI) ---
     ui_enabled: bool = _env("UI_ENABLED", True, bool)
     ui_host: str = _env("UI_HOST", "127.0.0.1")
